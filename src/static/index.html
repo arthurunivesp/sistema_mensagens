@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificador de Faltas - WhatsApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #25D366;
+            border-bottom-color: #25D366;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #25D366;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #25D366;
+        }
+
+        .student-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e1e5e9;
+            transition: background 0.2s ease;
+        }
+
+        .student-item:hover {
+            background: #f0f0f0;
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .checkbox {
+            margin-right: 10px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #25D366;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .whatsapp-icon {
+            color: #25D366;
+            font-size: 1.2rem;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                text-align: left;
+                border-bottom: 1px solid #e1e5e9;
+                border-right: none;
+            }
+
+            .tab.active {
+                border-bottom-color: #e1e5e9;
+                border-left: 3px solid #25D366;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="whatsapp-icon">📱</span>Notificador de Faltas</h1>
+            <p>Sistema de notificação automática via WhatsApp para responsáveis de alunos faltosos</p>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('turmas')">Gerenciar Turmas</button>
+                <button class="tab" onclick="showTab('alunos')">Gerenciar Alunos</button>
+                <button class="tab" onclick="showTab('notificar')">Enviar Notificações</button>
+                <button class="tab" onclick="showTab('configuracoes')">Configurações</button>
+            </div>
+
+            <div id="status-message" class="status-message"></div>
+
+            <!-- Tab: Gerenciar Turmas -->
+            <div id="turmas" class="tab-content active">
+                <h2>Gerenciar Turmas</h2>
+                
+                <div class="card">
+                    <h3>Adicionar Nova Turma</h3>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="nome-turma">Nome da Turma:</label>
+                            <input type="text" id="nome-turma" placeholder="Ex: 3º Ano A">
+                        </div>
+                        <div class="form-group">
+                            <label for="ano-turma">Ano/Série:</label>
+                            <input type="text" id="ano-turma" placeholder="Ex: 3º Ano">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="adicionarTurma()">Adicionar Turma</button>
+                </div>
+
+                <div class="card">
+                    <h3>Turmas Cadastradas</h3>
+                    <div id="lista-turmas" class="student-list">
+                        <!-- Turmas serão carregadas aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Gerenciar Alunos -->
+            <div id="alunos" class="tab-content">
+                <h2>Gerenciar Alunos</h2>
+                
+                <div class="card">
+                    <h3>Adicionar Novo Aluno</h3>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="nome-aluno">Nome do Aluno:</label>
+                            <input type="text" id="nome-aluno" placeholder="Nome completo do aluno">
+                        </div>
+                        <div class="form-group">
+                            <label for="turma-aluno">Turma:</label>
+                            <select id="turma-aluno">
+                                <option value="">Selecione uma turma</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="responsavel-nome">Nome do Responsável:</label>
+                            <input type="text" id="responsavel-nome" placeholder="Nome do responsável">
+                        </div>
+                        <div class="form-group">
+                            <label for="responsavel-telefone">Telefone do Responsável:</label>
+                            <input type="tel" id="responsavel-telefone" placeholder="(11) 99999-9999">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="adicionarAluno()">Adicionar Aluno</button>
+                </div>
+
+                <div class="card">
+                    <h3>Alunos Cadastrados</h3>
+                    <div class="form-group">
+                        <label for="filtro-turma">Filtrar por Turma:</label>
+                        <select id="filtro-turma" onchange="filtrarAlunos()">
+                            <option value="">Todas as turmas</option>
+                        </select>
+                    </div>
+                    <div id="lista-alunos" class="student-list">
+                        <!-- Alunos serão carregados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Enviar Notificações -->
+            <div id="notificar" class="tab-content">
+                <h2>Enviar Notificações</h2>
+                
+                <div class="card">
+                    <h3>Selecionar Turma e Alunos</h3>
+                    <div class="form-group">
+                        <label for="turma-notificacao">Turma:</label>
+                        <select id="turma-notificacao" onchange="carregarAlunosParaNotificacao()">
+                            <option value="">Selecione uma turma</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="data-evento">Data do Evento:</label>
+                        <input type="date" id="data-evento">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categoria-mensagem">Categoria da Mensagem:</label>
+                        <select id="categoria-mensagem" onchange="atualizarPreviaMensagem()">
+                            <option value="faltas">Alunos Faltosos</option>
+                            <option value="reuniao">Reunião de Pais</option>
+                            <option value="evento">Evento na Escola</option>
+                            <option value="convocacao">Convocação do Responsável</option>
+                            <option value="feriado">Feriados na Escola</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Destinatários:</label>
+                        <div id="alunos-notificacao" class="student-list">
+                            <!-- Alunos da turma selecionada aparecerão aqui -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mensagem-personalizada">Mensagem Personalizada (opcional):</label>
+                        <textarea id="mensagem-personalizada" rows="4" placeholder="Mensagem adicional para incluir na notificação..." oninput="atualizarPreviaMensagem()"></textarea>
+                    </div>
+
+                    <button class="btn" onclick="enviarNotificacoes()">
+                        <span class="whatsapp-icon">📱</span>
+                        Enviar Notificações via WhatsApp
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3>Prévia da Mensagem</h3>
+                    <div id="previa-mensagem" style="background: #e8f5e8; padding: 15px; border-radius: 8px; font-family: monospace;">
+                        <strong>Escola [Nome da Escola]</strong><br><br>
+                        Prezado(a) [Nome do Responsável],<br><br>
+                        Informamos que o(a) aluno(a) [Nome do Aluno] da turma [Turma] faltou às aulas no dia [Data].<br><br>
+                        Solicitamos que entre em contato com a escola para esclarecimentos.<br><br>
+                        Atenciosamente,<br>
+                        Secretaria Escolar
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Configurações -->
+            <div id="configuracoes" class="tab-content">
+                <h2>Configurações do Sistema</h2>
+                
+                <div class="card">
+                    <h3>Configurações da Escola</h3>
+                    <div class="form-group">
+                        <label for="nome-escola">Nome da Escola:</label>
+                        <input type="text" id="nome-escola" placeholder="Nome da instituição de ensino">
+                    </div>
+                    <div class="form-group">
+                        <label for="telefone-escola">Telefone da Escola:</label>
+                        <input type="tel" id="telefone-escola" placeholder="(11) 3333-3333">
+                    </div>
+                    <button class="btn" onclick="salvarConfiguracoes()">Salvar Configurações</button>
+                </div>
+
+                <div class="card">
+                    <h3>Status do WhatsApp</h3>
+                    <div id="whatsapp-status">
+                        <p>Status: <span id="status-conexao">Desconectado</span></p>
+                        <button class="btn" onclick="conectarWhatsApp()">Conectar WhatsApp</button>
+                        <button class="btn btn-secondary" onclick="desconectarWhatsApp()">Desconectar</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Backup e Restauração</h3>
+                    <button class="btn" onclick="exportarDados()">Exportar Dados</button>
+                    <button class="btn btn-secondary" onclick="importarDados()">Importar Dados</button>
+                    <input type="file" id="arquivo-importacao" style="display: none;" accept=".json">
+                </div>
+            </div>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Processando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let turmas = [];
+        let alunos = [];
+        let configuracoes = {
+            nomeEscola: '',
+            telefoneEscola: ''
+        };
+
+        // Modelos de mensagens predefinidas
+        const modelosMensagens = {
+            faltas: {
+                template: `Escola [Nome da Escola]\n\nPrezado(a) [Nome do Responsável],\n\nInformamos que o(a) aluno(a) [Nome do Aluno] da turma [Turma] faltou às aulas no dia [Data].\n\nSolicitamos que entre em contato com a escola para esclarecimentos.\n\n[Mensagem Personalizada]\n\nAtenciosamente,\nSecretaria Escolar`,
+                requiresDate: true
+            },
+            reuniao: {
+                template: `Escola [Nome da Escola]\n\nPrezado(a) [Nome do Responsável],\n\nConvidamos para a reunião de pais e responsáveis do(a) aluno(a) [Nome do Aluno] da turma [Turma], a ser realizada no dia [Data].\n\nSua presença é fundamental para discutirmos o desempenho escolar.\n\n[Mensagem Personalizada]\n\nAtenciosamente,\nSecretaria Escolar`,
+                requiresDate: true
+            },
+            evento: {
+                template: `Escola [Nome da Escola]\n\nPrezado(a) [Nome do Responsável],\n\nConvidamos você e o(a) aluno(a) [Nome do Aluno] da turma [Turma] para participar do evento escolar que ocorrerá no dia [Data].\n\nSerá uma oportunidade especial para integração e celebração.\n\n[Mensagem Personalizada]\n\nAtenciosamente,\nSecretaria Escolar`,
+                requiresDate: true
+            },
+            convocacao: {
+                template: `Escola [Nome da Escola]\n\nPrezado(a) [Nome do Responsável],\n\nSolicitamos sua presença urgente na escola para tratar de assuntos relacionados ao(a) aluno(a) [Nome do Aluno] da turma [Turma].\n\nPor favor, compareça o quanto antes.\n\n[Mensagem Personalizada]\n\nAtenciosamente,\nSecretaria Escolar`,
+                requiresDate: false
+            },
+            feriado: {
+                template: `Escola [Nome da Escola]\n\nPrezado(a) [Nome do Responsável],\n\nInformamos que não haverá aulas no dia [Data] devido ao feriado escolar.\n\nRetornaremos às atividades normalmente no próximo dia útil.\n\n[Mensagem Personalizada]\n\nAtenciosamente,\nSecretaria Escolar`,
+                requiresDate: true
+            }
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDados();
+            definirDataAtual();
+            verificarStatusWhatsApp();
+            atualizarPreviaMensagem();
+        });
+
+        // Verificar status do WhatsApp periodicamente
+        setInterval(verificarStatusWhatsApp, 10000);
+
+        async function carregarDados() {
+            await carregarTurmas();
+            await carregarAlunos();
+            await carregarConfiguracoes();
+        }
+
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(button => button.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function adicionarTurma() {
+            const nome = document.getElementById('nome-turma').value.trim();
+            const ano = document.getElementById('ano-turma').value.trim();
+            
+            if (!nome || !ano) {
+                mostrarMensagem('Por favor, preencha todos os campos.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/turmas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nome, ano })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('nome-turma').value = '';
+                    document.getElementById('ano-turma').value = '';
+                    
+                    await carregarTurmas();
+                    mostrarMensagem('Turma adicionada com sucesso!', 'success');
+                } else {
+                    const error = await response.json();
+                    mostrarMensagem(error.error || 'Erro ao adicionar turma', 'error');
+                }
+            } catch (error) {
+                mostrarMensagem('Erro de conexão', 'error');
+            }
+        }
+
+        async function carregarTurmas() {
+            try {
+                const response = await fetch('/api/turmas');
+                if (response.ok) {
+                    turmas = await response.json();
+                    atualizarListaTurmas();
+                    atualizarSelectsTurmas();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar turmas:', error);
+            }
+        }
+
+        function atualizarListaTurmas() {
+            const lista = document.getElementById('lista-turmas');
+            lista.innerHTML = '';
+            
+            turmas.forEach(turma => {
+                const item = document.createElement('div');
+                item.className = 'student-item';
+                item.innerHTML = `
+                    <div>
+                        <strong>${turma.nome}</strong> - ${turma.ano}
+                    </div>
+                    <button class="btn btn-danger" onclick="removerTurma(${turma.id})">Remover</button>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        async function removerTurma(id) {
+            if (confirm('Tem certeza que deseja remover esta turma? Todos os alunos desta turma também serão removidos.')) {
+                try {
+                    const response = await fetch(`/api/turmas/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        await carregarTurmas();
+                        await carregarAlunos();
+                        mostrarMensagem('Turma removida com sucesso!', 'success');
+                    } else {
+                        mostrarMensagem('Erro ao remover turma', 'error');
+                    }
+                } catch (error) {
+                    mostrarMensagem('Erro de conexão', 'error');
+                }
+            }
+        }
+
+        async function adicionarAluno() {
+            const nome = document.getElementById('nome-aluno').value.trim();
+            const turmaId = parseInt(document.getElementById('turma-aluno').value);
+            const responsavelNome = document.getElementById('responsavel-nome').value.trim();
+            const responsavelTelefone = document.getElementById('responsavel-telefone').value.trim();
+            
+            if (!nome || !turmaId || !responsavelNome || !responsavelTelefone) {
+                mostrarMensagem('Por favor, preencha todos os campos.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/alunos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nome,
+                        turma_id: turmaId,
+                        responsavel_nome: responsavelNome,
+                        responsavel_telefone: responsavelTelefone
+                    })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('nome-aluno').value = '';
+                    document.getElementById('turma-aluno').value = '';
+                    document.getElementById('responsavel-nome').value = '';
+                    document.getElementById('responsavel-telefone').value = '';
+                    
+                    await carregarAlunos();
+                    mostrarMensagem('Aluno adicionado com sucesso!', 'success');
+                } else {
+                    const error = await response.json();
+                    mostrarMensagem(error.error || 'Erro ao adicionar aluno', 'error');
+                }
+            } catch (error) {
+                mostrarMensagem('Erro de conexão', 'error');
+            }
+        }
+
+        async function carregarAlunos() {
+            try {
+                const response = await fetch('/api/alunos');
+                if (response.ok) {
+                    alunos = await response.json();
+                    atualizarListaAlunos();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar alunos:', error);
+            }
+        }
+
+        function atualizarListaAlunos() {
+            const lista = document.getElementById('lista-alunos');
+            const filtroTurma = parseInt(document.getElementById('filtro-turma').value) || null;
+            
+            lista.innerHTML = '';
+            
+            const alunosFiltrados = filtroTurma ? 
+                alunos.filter(a => a.turma_id === filtroTurma) : alunos;
+            
+            alunosFiltrados.forEach(aluno => {
+                const turma = turmas.find(t => t.id === aluno.turma_id);
+                const item = document.createElement('div');
+                item.className = 'student-item';
+                item.innerHTML = `
+                    <div>
+                        <strong>${aluno.nome}</strong><br>
+                        <small>Turma: ${turma ? turma.nome : 'N/A'} | Responsável: ${aluno.responsavel_nome} (${aluno.responsavel_telefone})</small>
+                    </div>
+                    <button class="btn btn-danger" onclick="removerAluno(${aluno.id})">Remover</button>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        async function removerAluno(id) {
+            if (confirm('Tem certeza que deseja remover este aluno?')) {
+                try {
+                    const response = await fetch(`/api/alunos/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        await carregarAlunos();
+                        mostrarMensagem('Aluno removido com sucesso!', 'success');
+                    } else {
+                        mostrarMensagem('Erro ao remover aluno', 'error');
+                    }
+                } catch (error) {
+                    mostrarMensagem('Erro de conexão', 'error');
+                }
+            }
+        }
+
+        function filtrarAlunos() {
+            atualizarListaAlunos();
+        }
+
+        function carregarAlunosParaNotificacao() {
+            const turmaId = parseInt(document.getElementById('turma-notificacao').value);
+            const container = document.getElementById('alunos-notificacao');
+            
+            container.innerHTML = '';
+            
+            if (!turmaId) return;
+            
+            const alunosDaTurma = alunos.filter(a => a.turma_id === turmaId);
+            
+            alunosDaTurma.forEach(aluno => {
+                const item = document.createElement('div');
+                item.className = 'student-item';
+                item.innerHTML = `
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" class="checkbox" value="${aluno.id}">
+                        <div>
+                            <strong>${aluno.nome}</strong><br>
+                            <small>Responsável: ${aluno.responsavel_nome} (${aluno.responsavel_telefone})</small>
+                        </div>
+                    </label>
+                `;
+                container.appendChild(item);
+            });
+            atualizarPreviaMensagem();
+        }
+
+        function atualizarPreviaMensagem() {
+            const categoria = document.getElementById('categoria-mensagem').value;
+            const mensagemPersonalizada = document.getElementById('mensagem-personalizada').value.trim();
+            const dataEvento = document.getElementById('data-evento').value;
+            const turmaId = parseInt(document.getElementById('turma-notificacao').value) || null;
+            const nomeEscola = document.getElementById('nome-escola').value || '[Nome da Escola]';
+            
+            let alunoExemplo = { nome: '[Nome do Aluno]', responsavel_nome: '[Nome do Responsável]' };
+            let turmaExemplo = { nome: '[Turma]' };
+            
+            if (turmaId) {
+                const alunosDaTurma = alunos.filter(a => a.turma_id === turmaId);
+                if (alunosDaTurma.length > 0) {
+                    alunoExemplo = alunosDaTurma[0];
+                }
+                const turma = turmas.find(t => t.id === turmaId);
+                if (turma) {
+                    turmaExemplo = turma;
+                }
+            }
+
+            let mensagem = modelosMensagens[categoria].template;
+            mensagem = mensagem
+                .replace('[Nome da Escola]', nomeEscola)
+                .replace('[Nome do Aluno]', alunoExemplo.nome)
+                .replace('[Nome do Responsável]', alunoExemplo.responsavel_nome)
+                .replace('[Turma]', turmaExemplo.nome)
+                .replace('[Data]', dataEvento ? new Date(dataEvento).toLocaleDateString('pt-BR') : '[Data]')
+                .replace('[Mensagem Personalizada]', mensagemPersonalizada ? mensagemPersonalizada : '');
+
+            document.getElementById('previa-mensagem').textContent = mensagem;
+        }
+
+        async function enviarNotificacoes() {
+            const turmaId = parseInt(document.getElementById('turma-notificacao').value);
+            const dataEvento = document.getElementById('data-evento').value;
+            const mensagemPersonalizada = document.getElementById('mensagem-personalizada').value.trim();
+            const categoria = document.getElementById('categoria-mensagem').value;
+            
+            if (!turmaId) {
+                mostrarMensagem('Por favor, selecione uma turma.', 'error');
+                return;
+            }
+            
+            if (modelosMensagens[categoria].requiresDate && !dataEvento) {
+                mostrarMensagem('Por favor, selecione a data do evento.', 'error');
+                return;
+            }
+            
+            const checkboxes = document.querySelectorAll('#alunos-notificacao input[type="checkbox"]:checked');
+            
+            if (checkboxes.length === 0) {
+                mostrarMensagem('Por favor, selecione pelo menos um destinatário.', 'error');
+                return;
+            }
+            
+            const alunosSelecionados = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            
+            mostrarLoading(true);
+            
+            try {
+                const response = await fetch('/api/notificacoes/enviar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        alunos_ids: alunosSelecionados,
+                        data_evento: dataEvento,
+                        mensagem_personalizada: mensagemPersonalizada,
+                        categoria: categoria
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    mostrarMensagem(result.message, 'success');
+                    
+                    checkboxes.forEach(cb => cb.checked = false);
+                    document.getElementById('mensagem-personalizada').value = '';
+                    atualizarPreviaMensagem();
+                } else {
+                    mostrarMensagem(result.error || 'Erro ao enviar notificações', 'error');
+                }
+            } catch (error) {
+                mostrarMensagem('Erro de conexão', 'error');
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+
+        async function salvarConfiguracoes() {
+            const nomeEscola = document.getElementById('nome-escola').value.trim();
+            const telefoneEscola = document.getElementById('telefone-escola').value.trim();
+            
+            try {
+                const response = await fetch('/api/configuracoes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nome_escola: nomeEscola,
+                        telefone_escola: telefoneEscola
+                    })
+                });
+                
+                if (response.ok) {
+                    mostrarMensagem('Configurações salvas com sucesso!', 'success');
+                    atualizarPreviaMensagem();
+                } else {
+                    mostrarMensagem('Erro ao salvar configurações', 'error');
+                }
+            } catch (error) {
+                mostrarMensagem('Erro de conexão', 'error');
+            }
+        }
+
+        async function carregarConfiguracoes() {
+            try {
+                const response = await fetch('/api/configuracoes');
+                if (response.ok) {
+                    const configs = await response.json();
+                    document.getElementById('nome-escola').value = configs.nome_escola || '';
+                    document.getElementById('telefone-escola').value = configs.telefone_escola || '';
+                    atualizarPreviaMensagem();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar configurações:', error);
+            }
+        }
+
+        async function conectarWhatsApp() {
+            mostrarLoading(true);
+            
+            try {
+                const response = await fetch('/api/whatsapp/conectar', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.conectado) {
+                    document.getElementById('status-conexao').textContent = 'Conectado';
+                    document.getElementById('status-conexao').style.color = '#25D366';
+                    mostrarMensagem(result.mensagem, 'success');
+                    ocultarQRCode();
+                } else if (result.qr_code) {
+                    exibirQRCode(result.qr_code);
+                    document.getElementById('status-conexao').textContent = 'Aguardando QR Code';
+                    document.getElementById('status-conexao').style.color = '#ffc107';
+                    mostrarMensagem('Escaneie o QR Code com seu celular', 'info');
+                    
+                    aguardarConexao();
+                } else {
+                    document.getElementById('status-conexao').textContent = 'Erro na conexão';
+                    document.getElementById('status-conexao').style.color = '#dc3545';
+                    mostrarMensagem(result.mensagem, 'error');
+                }
+            } catch (error) {
+                mostrarMensagem('Erro de conexão com o servidor', 'error');
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+
+        async function aguardarConexao() {
+            try {
+                const response = await fetch('/api/whatsapp/aguardar-conexao', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.conectado) {
+                    document.getElementById('status-conexao').textContent = 'Conectado';
+                    document.getElementById('status-conexao').style.color = '#25D366';
+                    mostrarMensagem('WhatsApp conectado com sucesso!', 'success');
+                    ocultarQRCode();
+                } else {
+                    document.getElementById('status-conexao').textContent = 'Falha na conexão';
+                    document.getElementById('status-conexao').style.color = '#dc3545';
+                    mostrarMensagem(result.mensagem, 'error');
+                    ocultarQRCode();
+                }
+            } catch (error) {
+                mostrarMensagem('Erro ao aguardar conexão', 'error');
+                ocultarQRCode();
+            }
+        }
+
+        function exibirQRCode(qrCodeBase64) {
+            let qrContainer = document.getElementById('qr-code-container');
+            
+            if (!qrContainer) {
+                qrContainer = document.createElement('div');
+                qrContainer.id = 'qr-code-container';
+                qrContainer.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 30px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    z-index: 1000;
+                    text-align: center;
+                    max-width: 400px;
+                `;
+                
+                const overlay = document.createElement('div');
+                overlay.id = 'qr-overlay';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 999;
+                `;
+                
+                document.body.appendChild(overlay);
+                document.body.appendChild(qrContainer);
+            }
+            
+            qrContainer.innerHTML = `
+                <h3 style="margin-bottom: 20px; color: #333;">Conectar WhatsApp</h3>
+                <p style="margin-bottom: 20px; color: #666;">Escaneie o QR Code com seu celular:</p>
+                <img src="${qrCodeBase64}" alt="QR Code WhatsApp" style="max-width: 250px; border: 2px solid #25D366; border-radius: 10px;">
+                <p style="margin-top: 20px; font-size: 14px; color: #888;">
+                    1. Abra o WhatsApp no seu celular<br>
+                    2. Toque em Menu > WhatsApp Web<br>
+                    3. Escaneie este código
+                </p>
+                <div style="margin-top: 20px;">
+                    <div class="spinner" style="margin: 0 auto;"></div>
+                    <p style="margin-top: 10px; color: #666;">Aguardando conexão... (até 90 segundos)</p>
+                    <p style="margin-top: 5px; font-size: 12px; color: #999;">O sistema verificará automaticamente quando você escanear o código</p>
+                </div>
+            `;
+        }
+
+        function ocultarQRCode() {
+            const qrContainer = document.getElementById('qr-code-container');
+            const overlay = document.getElementById('qr-overlay');
+            
+            if (qrContainer) {
+                qrContainer.remove();
+            }
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        async function verificarStatusWhatsApp() {
+            try {
+                const response = await fetch('/api/whatsapp/verificar-status');
+                const result = await response.json();
+                
+                if (result.conectado) {
+                    document.getElementById('status-conexao').textContent = 'Conectado';
+                    document.getElementById('status-conexao').style.color = '#25D366';
+                    ocultarQRCode();
+                } else if (result.qr_code) {
+                    document.getElementById('status-conexao').textContent = 'QR Code disponível';
+                    document.getElementById('status-conexao').style.color = '#ffc107';
+                } else {
+                    document.getElementById('status-conexao').textContent = 'Desconectado';
+                    document.getElementById('status-conexao').style.color = '#dc3545';
+                    ocultarQRCode();
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status do WhatsApp:', error);
+            }
+        }
+
+        async function desconectarWhatsApp() {
+            try {
+                const response = await fetch('/api/whatsapp/desconectar', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                document.getElementById('status-conexao').textContent = 'Desconectado';
+                document.getElementById('status-conexao').style.color = '#dc3545';
+                mostrarMensagem(result.mensagem, 'success');
+                ocultarQRCode();
+            } catch (error) {
+                mostrarMensagem('Erro de conexão com o servidor', 'error');
+            }
+        }
+
+        function exportarDados() {
+            const dados = {
+                turmas: turmas,
+                alunos: alunos,
+                configuracoes: configuracoes
+            };
+            
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_notificador_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            mostrarMensagem('Dados exportados com sucesso!', 'success');
+        }
+
+        function importarDados() {
+            document.getElementById('arquivo-importacao').click();
+        }
+
+        document.getElementById('arquivo-importacao').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dados = JSON.parse(e.target.result);
+                    
+                    if (dados.turmas) turmas = dados.turmas;
+                    if (dados.alunos) alunos = dados.alunos;
+                    if (dados.configuracoes) configuracoes = dados.configuracoes;
+                    
+                    salvarDados();
+                    carregarDados();
+                    mostrarMensagem('Dados importados com sucesso!', 'success');
+                } catch (error) {
+                    mostrarMensagem('Erro ao importar dados. Verifique o arquivo.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function atualizarSelectsTurmas() {
+            const selects = ['turma-aluno', 'filtro-turma', 'turma-notificacao'];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                const valorAtual = select.value;
+                
+                const primeiraOpcao = select.children[0];
+                select.innerHTML = '';
+                select.appendChild(primeiraOpcao);
+                
+                turmas.forEach(turma => {
+                    const option = document.createElement('option');
+                    option.value = turma.id;
+                    option.textContent = turma.nome;
+                    select.appendChild(option);
+                });
+                
+                select.value = valorAtual;
+            });
+        }
+
+        function definirDataAtual() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('data-evento').value = hoje;
+            atualizarPreviaMensagem();
+        }
+
+        function mostrarMensagem(texto, tipo) {
+            const elemento = document.getElementById('status-message');
+            elemento.textContent = texto;
+            elemento.className = `status-message status-${tipo}`;
+            elemento.style.display = 'block';
+            
+            setTimeout(() => {
+                elemento.style.display = 'none';
+            }, 5000);
+        }
+
+        function mostrarLoading(mostrar) {
+            document.getElementById('loading').style.display = mostrar ? 'block' : 'none';
+        }
+
+        function salvarDados() {
+            // Dados salvos via API
+        }
+    </script>
+</body>
+</html>
+
+
