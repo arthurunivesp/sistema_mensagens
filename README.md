@@ -30,6 +30,51 @@ O **Notificador de Faltas - WhatsApp** é um aplicativo web desenvolvido em Flas
 - Conexão com a internet
 - Conta do WhatsApp
 
+Para rodar a aplicação sistema_mensagens (um sistema de notificações escolares com Flask, SQLite e integração com WhatsApp via Selenium/AllWhatsPy) em outro PC, você precisa instalar as dependências necessárias e configurar o ambiente corretamente. Com base no contexto do projeto (repositório arthurunivesp/sistema_mensagens e estrutura mencionada), aqui está a lista completa do que precisa ser instalado e configurado, incluindo detalhes para garantir que a aplicação funcione sem os dados de exemplo ("3º Ano A" e "João Silva") e com suporte à exibição de múltiplos alunos.
+
+Requisitos para Rodar a Aplicação
+A aplicação depende de Python, bibliotecas específicas, um navegador compatível com Selenium, e um driver para automação do WhatsApp. Abaixo está o passo a passo para configurar tudo em outro PC.
+
+1. Instalar o Python
+Requisito: Python 3.8 ou superior (recomendado: Python 3.9 ou 3.10 para compatibilidade com as bibliotecas).
+Instruções:
+Baixe o instalador do Python em python.org.
+Escolha a versão mais recente compatível (ex.: Python 3.10.x).
+Durante a instalação:
+Marque a opção "Add Python to PATH" (adicionar Python ao PATH do sistema).
+Selecione "Install for all users" (opcional, mas recomendado).
+Verifique a instalação:
+bash
+
+Recolher
+
+Encapsular
+
+Executar
+
+Copiar
+python --version
+pip --version
+Isso deve mostrar a versão do Python (ex.: Python 3.10.5) e do pip (ex.: pip 22.3.1).
+2. Clonar o Repositório
+Requisito: Git instalado para clonar o repositório arthurunivesp/sistema_mensagens.
+Instruções:
+Instale o Git:
+Windows: Baixe o instalador em git-scm.com e siga as instruções padrão.
+Linux: sudo apt-get install git (Ubuntu/Debian) ou sudo yum install git (CentOS/RHEL).
+macOS: brew install git (se tiver Homebrew) ou instale via Xcode.
+Verifique a instalação:
+bash
+
+Recolher
+
+Encapsular
+
+Executar
+
+Copiar
+git --version
+
 ## Instalação
 
 ### 1. Clone ou baixe o projeto
